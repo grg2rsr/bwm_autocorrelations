@@ -14,7 +14,7 @@ def expon_decay(t, A, tau, b):
     return A * np.exp(-t / tau) + b
 
 
-def bin_spike_train(t: np.ndarry, dt: float):
+def bin_spike_train(t: np.ndarray, dt: float):
     t_start = 0
     t_stop = t[-1]
     bins = np.arange(t_start, t_stop + dt, dt)

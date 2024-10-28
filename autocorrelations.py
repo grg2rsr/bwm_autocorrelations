@@ -30,9 +30,9 @@ min_firing_rate = 0.5
 import functions
 import sys
 
-sys.path.append(
-    "/home/georg/code/ibldevtools/georg/bwm_autocorrelations"
-)  # I clearly don't know what I am doing ...
+# sys.path.append(
+#     "/home/georg/code/ibldevtools/georg/bwm_autocorrelations"
+# )  # I clearly don't know what I am doing ...
 
 brain_regions = ["ORB"]
 

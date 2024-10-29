@@ -14,9 +14,9 @@ def expon_decay(t, A, tau, b):
     return A * np.exp(-t / tau) + b
 
 
-def bin_spike_train(t: np.ndarray, dt: float):
-    t_start = 0
-    t_stop = t[-1]
+def bin_spike_train(t: np.ndarray, dt: float, t_start=None, t_stop=None):
+    t_start = 0 if t_start is None else t_start
+    t_stop = t[-1] if t_stop is None else t_stop
     bins = np.arange(t_start, t_stop + dt, dt)
     ix = np.digitize(t, bins)
     tb = np.zeros_like(bins)
@@ -24,23 +24,21 @@ def bin_spike_train(t: np.ndarray, dt: float):
     return tb
 
 
-def calc_acorr(t: np.ndarray, dt=0.005, n_lags=500, n_offset=10):
+def calc_acorr(t: np.ndarray, dt=0.005, n_lags=500):
     # for a spike train t
-    # first binarize with bin size dt
+    # binarize
     tb = bin_spike_train(t, dt)
 
     # calculate autocorrelation
-    # skip n_offset bins, n_offset * dt have to be larger than the
-    # refractory period dip for the exp decay fit to make sense
-    lags = np.arange(n_offset, n_lags)
+    lags = np.arange(0, n_lags)
     acorr = np.array([np.sum(tb * np.roll(tb, lag)) for lag in lags])
-
     return acorr, lags
 
 
-def fit_acorr(acorr, dt, lags):
+def fit_acorr(acorr, dt, lags, n_offset=1):
     # start form shoulder after refractory period
-    max_ix = np.argmax(acorr)
+    # skip n_offset lags for finding the peak
+    max_ix = np.argmax(acorr[n_offset:])
 
     # fit an exponential decay to the autocorrelation
     n_lags = lags.shape[0]

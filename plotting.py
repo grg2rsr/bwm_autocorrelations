@@ -11,7 +11,7 @@ mpl.rcParams['figure.dpi'] = 166
 %matplotlib qt5
 
 # %% get data
-output_folder = Path("/home/georg/ibl_scratch/bwm_autocorrelations")
+output_folder = Path("/media/georg/openlab/ibl_scratch/bwm_autocorrelations")
 csv_files = [f for f in list(output_folder.iterdir()) if f.suffix == '.csv']
 df = pd.concat([pd.read_csv(csv_file) for csv_file in csv_files], axis=0)
 df = df.reset_index()
@@ -23,11 +23,12 @@ axes.set_title(df.shape[0])
 sns.despine(axes.figure)
 
 # %%
+from one.api import ONE
 ONE.setup(base_url="https://openalyx.internationalbrainlab.org", silent=True)
 one = ONE(password="international", mode="remote")
 
 # %% inspecting a single one
-row = df[df['tau'] > 5].iloc[0]
+row = df[df['tau'] > 5].iloc[1]
 pid = row.pid
 uuid = row.uuids
 
@@ -50,8 +51,9 @@ acorr, lags = functions.calc_acorr(t, dt, n_lags)
 popt = functions.fit_acorr(acorr, dt, lags)
 
 # %%
+n_skip = 1
 fig, axes = plt.subplots()
-axes.plot(lags*dt, acorr)
-axes.plot(lags*dt, functions.expon_decay(lags*dt, *popt))
+axes.plot(lags[n_skip:]*dt, acorr[n_skip:])
+axes.plot(lags[n_skip:]*dt, functions.expon_decay(lags[n_skip:]*dt, *popt))
 
 # %%

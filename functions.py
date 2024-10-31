@@ -1,13 +1,15 @@
 import numpy as np
 from scipy.optimize import curve_fit
 import pandas as pd
-from iblatlas.regions import BrainRegions
 
+# from iblatlas.regions import BrainRegions
+# from brainbox.io.one import SpikeSortingLoader
 
-def get_spikes_for_cluster(spike_clusters, spike_times, cluster):
-    # requires that spike_times and spike_clusters are sorted
-    start_ix, stop_ix = np.searchsorted(spike_clusters, [cluster, cluster + 1])
-    return np.sort(spike_times[start_ix:stop_ix])
+# abandoned this strategy, see benchmarking script in ibldevtools/georg
+# def get_spikes_for_cluster(spike_clusters, spike_times, cluster):
+#     # requires that spike_times and spike_clusters are sorted
+#     start_ix, stop_ix = np.searchsorted(spike_clusters, [cluster, cluster + 1])
+#     return np.sort(spike_times[start_ix:stop_ix])
 
 
 def expon_decay(t, A, tau, b):
@@ -51,54 +53,4 @@ def fit_acorr(acorr, dt, lags, n_offset=1):
         )[0]
         return popt
     except RuntimeError:
-        return (np.nan, np.nan, np.nan)
-
-
-def get_spikes(pid, one):
-    # convert to probe name and eid
-    eid, pname = one.pid2eid(pid)
-
-    # get spike times
-    spike_times = one.load_dataset(
-        eid, "spikes.times", collection=f"alf/{pname}/pykilosort"
-    )
-
-    # get spike clusters
-    spike_clusters = one.load_dataset(
-        eid, "spikes.clusters", collection=f"alf/{pname}/pykilosort"
-    )
-    return spike_times, spike_clusters
-
-
-def get_clusters_metrics(pid, one):
-    # convert to probe name and eid
-    eid, pname = one.pid2eid(pid)
-
-    # get channel for each cluster
-    clusters_channels = one.load_dataset(
-        eid, f"alf/{pname}/pykilosort/clusters.channels.npy"
-    )
-
-    # forming the unit dataframe
-    clusters_metrics = one.load_dataset(
-        eid, f"alf/{pname}/pykilosort/clusters.metrics.pqt"
-    )
-
-    # get and add the uuid for each cluster
-    uuids = one.load_dataset(eid, f"alf/{pname}/pykilosort/clusters.uuids.csv")
-    clusters_metrics = clusters_metrics.join(uuids)
-
-    # combining with histological / location information
-    # which channel at which brain area (allen id)
-    channel_allen_ids = one.load_dataset(
-        eid, f"alf/{pname}/pykilosort/channels.brainLocationIds_ccf_2017.npy"
-    )
-
-    # converting allen id in to allen acronym
-    brain_regions = BrainRegions()
-    channel_allen_acro = brain_regions.id2acronym(channel_allen_ids)
-
-    # mapping allen_acro onto spike_cluster
-    clusters_metrics["allen_acro"] = channel_allen_acro[clusters_channels]
-
-    return clusters_metrics
+        return (np.nan, np.nan, np.nan)  #     return clusters_metrics
